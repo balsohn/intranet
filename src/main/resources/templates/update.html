@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/default">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 수정</title>
+    <style>
+        .update-form {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .update-form h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .update-form table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .update-form td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .update-form td:first-child {
+            width: 100px;
+            font-weight: bold;
+            color: #555;
+        }
+        .update-form input[type="text"],
+        .update-form textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .update-form textarea {
+            height: 200px;
+            resize: vertical;
+        }
+        .button-group {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="update-form">
+        <h2>게시글 수정</h2>
+        <form action="update" method="post" th:object="${bvo}">
+        	<input type="hidden" name="grp" th:value="${grp}">
+        	<input type="hidden" name="page" th:value="${page}">
+            <input type="hidden" th:field="*{id}">
+            <table>
+                <tr>
+                    <td>제목</td>
+                    <td><input type="text" th:field="*{title}" required></td>
+                </tr>
+                <tr>
+                    <td>작성자</td>
+                    <td th:text="*{sabun}"></td>
+                </tr>
+                <tr>
+                    <td>내용</td>
+                    <td><textarea th:field="*{content}" required></textarea></td>
+                </tr>
+            </table>
+            <div class="button-group">
+                <a th:href="@{/content(id=${bvo.id},page=${page},grp=${grp})}" class="btn btn-secondary">취소</a>
+                <button type="submit" class="btn btn-primary">수정 완료</button>
+            </div>
+        </form>
+    </div>
+</section>
+</body>
+</html>

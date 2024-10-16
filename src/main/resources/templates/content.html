@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/default">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 상세</title>
+    <style>
+        .post-detail {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .post-detail table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .post-detail td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .post-detail td:first-child {
+            width: 100px;
+            font-weight: bold;
+            color: #555;
+        }
+        .post-content {
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .button-group {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="post-detail">
+        <table>
+            <tr>
+                <td>제목</td>
+                <td th:text="${bvo.title}"></td>
+            </tr>
+            <tr>
+                <td>작성자</td>
+                <td th:text="${bvo.sabun}"></td>
+            </tr>
+            <tr>
+                <td>작성일</td>
+                <td th:text="${bvo.writeday}"></td>
+            </tr>
+        </table>
+        <div class="post-content" th:text="${bvo.content}"></div>
+        
+        <div class="button-group">
+            <a th:href="@{/list(grp=${param.grp},page=${param.page})}" class="btn btn-secondary">목록</a>
+        <th:block th:if="${session.sabun==bvo.sabun}">
+            <a th:href="@{/update(id=${bvo.id},grp=${param.grp},page=${param.page})}" class="btn btn-primary">수정</a>
+        </th:block>
+        <th:block th:if="${session.sabun==bvo.sabun || session.level==100}">
+            <a th:href="@{/delete(id=${bvo.id},grp=${param.grp},page=${param.page})}" class="btn btn-danger" 
+               onclick="return confirm('정말로 삭제하시겠습니까?');" >삭제</a>
+        </th:block>
+        </div>
+    </div>
+</section>
+</body>
+</html>

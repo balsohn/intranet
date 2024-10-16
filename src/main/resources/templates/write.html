@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/default">
+<head>
+    <meta charset="UTF-8">
+    <title>글쓰기</title>
+    <style>
+        .write-form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .write-form h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .write-form table {
+            width: 100%;
+        }
+        .write-form td {
+            padding: 10px;
+        }
+        .write-form input[type="text"],
+        .write-form textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .write-form textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        .write-form .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .write-form .radio-group label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .write-form .radio-group input[type="radio"] {
+            margin-right: 5px;
+        }
+        .write-form .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .write-form .submit-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<section layout:fragment="content">
+    <form method="post" action="write" class="write-form">
+        <h2>글쓰기</h2>
+        <table>
+            <tr>
+                <td>제목</td>
+                <td><input type="text" name="title" placeholder="제목을 입력하세요"></td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td><textarea name="content" placeholder="내용을 입력하세요"></textarea></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div class="radio-group">
+                        <label><input type="radio" name="grp" value="0"> 전체 게시판</label>
+                        <label th:if="${session.depart=='총무부' || session.level==100}"><input type="radio" name="grp" value="1"> 총무부</label>
+                        <label th:if="${session.depart=='자재부' || session.level==100}"><input type="radio" name="grp" value="2"> 자재부</label>
+                        <label th:if="${session.depart=='영업부' || session.level==100}"><input type="radio" name="grp" value="3"> 영업부</label>
+                        <label th:if="${session.depart=='감사부' || session.level==100}"><input type="radio" name="grp" value="4"> 감사부</label>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <button type="submit" class="submit-btn">글 작성</button>
+    </form>
+</section>
+</body>
+</html>

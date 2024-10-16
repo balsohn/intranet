@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/default">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 목록</title>
+    <style>
+        .board-list {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .board-list th, .board-list td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .board-list th {
+            background-color: #f8f9fa;
+            color: #333;
+            font-weight: bold;
+        }
+        .board-list tr:hover {
+            background-color: #f5f5f5;
+        }
+        .board-list a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .board-list a:hover {
+            text-decoration: underline;
+        }
+        .write-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 15px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            float: right;
+        }
+        .write-link:hover {
+            background-color: #218838;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        .pagination li {
+            margin: 0 5px;
+        }
+        .pagination a {
+            display: block;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .pagination a:hover {
+            background-color: #f8f9fa;
+        }
+        .pagination .active a {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        
+		.pagination .disabled a {
+			color: #6c757d;
+			pointer-events: none;
+			cursor: default;
+		}
+		
+		.pagination .active a {
+			background-color: #007bff;
+			border-color: #007bff;
+			color: white;
+		}
+    </style>
+</head>
+<body>
+<section layout:fragment="content">
+    <table class="board-list">
+        <thead>
+            <tr>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>작성일</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="content : ${bvo}">
+                <td><a th:href="@{content(id=${content.id},grp=${param.grp},page=${page})}" th:text="${content.title}"></a></td>
+                <td th:text="${content.sabun}"></td>
+                <td th:text="${content.writeday}"></td>
+            </tr>
+        </tbody>
+    </table>
+    <a href="write" class="write-link">글쓰기</a>
+    
+    <!-- 페이지네이션 예시 (실제 구현에 따라 수정 필요) -->
+    <ul class="pagination" th:if="${chong > 0}">
+        <!-- 첫 페이지로 -->
+        <li th:class="${page == 1 ? 'disabled' : ''}">
+            <a th:href="@{/list(grp=${param.grp}, page=1)}">&laquo;</a>
+        </li>
+        
+        <!-- 이전 페이지 그룹으로 -->
+        <li th:class="${pstart == 1 ? 'disabled' : ''}">
+            <a th:href="@{/list(grp=${param.grp}, page=${pstart - 1})}">&lt;</a>
+        </li>
+        
+        <!-- 페이지 번호들 -->
+        <li th:each="pageNum : ${#numbers.sequence(pstart, pend)}" 
+            th:class="${pageNum == page ? 'active' : ''}">
+            <a th:href="@{/list(grp=${param.grp}, page=${pageNum})}" th:text="${pageNum}"></a>
+        </li>
+        
+        <!-- 다음 페이지 그룹으로 -->
+        <li th:class="${pend == chong ? 'disabled' : ''}">
+            <a th:href="@{/list(grp=${param.grp}, page=${pend + 1})}">&gt;</a>
+        </li>
+        
+        <!-- 마지막 페이지로 -->
+        <li th:class="${page == chong ? 'disabled' : ''}">
+            <a th:href="@{/list(grp=${param.grp}, page=${chong})}">&raquo;</a>
+        </li>
+    </ul>
+</section>
+</body>
+</html>

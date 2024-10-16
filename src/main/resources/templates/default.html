@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>인트라넷 시스템</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            width: 100%;
+            background-color: #333;
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+        nav {
+            width: 100%;
+            background-color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        nav > ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav > ul > li {
+            position: relative;
+        }
+        nav > ul > li > a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        nav > ul > li > a:hover {
+            background-color: #45a049;
+        }
+        .grp {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            padding: 0;
+            margin: 0;
+            list-style-type: none;
+        }
+        .grp li {
+            width: 100%;
+        }
+        .grp li a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            transition: background-color 0.3s;
+        }
+        .grp li a:hover {
+            background-color: #e8e8e8;
+        }
+        nav > ul > li:hover .grp {
+            display: block;
+        }
+        section {
+            width: 80%;
+            margin: auto;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        footer {
+            width: 100%;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            position: fixed;
+            bottom: 0;
+        }
+        .user-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>인트라넷 시스템</h1>
+        <div class="user-info">
+            <span th:text="${session.level}"></span>
+            <span th:text="${session.sabun}"></span>
+        </div>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#">사원관리</a></li>
+            <li>
+                <a href="#">부서게시판</a>
+                <ul class="grp">
+                    <li th:if="${session.depart=='총무부' || session.level==100 }"><a href="list?grp=1">총무부</a></li>
+                    <li th:if="${session.depart=='자재부' || session.level==100 }"><a href="list?grp=2">자재부</a></li>
+                    <li th:if="${session.depart=='영업부' || session.level==100 }"><a href="list?grp=3">영업부</a></li>
+                    <li th:if="${session.depart=='감사부' || session.level==100 }"><a href="list?grp=4">감사부</a></li>
+                    <li><a href="list?grp=0">전체</a></li>
+                </ul>
+            </li>
+            <li><a href="#">출퇴근 메모</a></li>
+            <li><a href="#">메모관리</a></li>
+            <li><a href="#">로그아웃</a></li>
+        </ul>
+    </nav>
+    <section layout:fragment="content"></section>
+    <footer>
+        <p>&copy; 2024 인트라넷 시스템. All rights reserved.</p>
+    </footer>
+</body>
+</html>
