@@ -28,4 +28,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<delete id="delete">
 		delete from board where id=#{id}
 	</delete>
+	<select id="getSawon" resultType="kr.co.miniIntra.SawonVo">
+		select * from sawon where sabun like concat(#{depart},'%')
+	</select>
+	<insert id="memoOk">
+		insert into memo
+		(seSabun,reSabun,title,content,fname,writeday) values
+		(#{seSabun}, #{reSabun}, #{title}, #{content}, #{fname}, now())
+	</insert>
+	<select id="getRe" resultType="kr.co.miniIntra.MemoVo">
+		select * from memo where reSabun=#{sabun} order by writeday desc
+		limit #{index},#{pageSize}
+	</select>
+	<select id="getReChong" resultType="int">
+		select ceil(count(*)/#{pageSize}) from memo
+		where reSabun=#{sabun}
+	</select>
+	
+	<select id="getSend" resultType="kr.co.miniIntra.MemoVo">
+		select * from memo where seSabun=#{sabun} order by writeday desc
+		limit #{seIndex},#{pageSize}
+	</select>
+		<select id="getSeChong" resultType="int">
+		select ceil(count(*)/#{pageSize}) from memo
+		where seSabun=#{sabun}
+	</select>
+	<select id="getMemo" resultType="kr.co.miniIntra.MemoVo">
+		select * from memo where id=#{id}
+	</select>
 </mapper>

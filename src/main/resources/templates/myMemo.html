@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/default">
+<head>
+    <meta charset="UTF-8">
+    <title>메모 페이지</title>
+   
+    <style>
+        .memo-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .memo-lists {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .memo-section {
+            width: 48%;
+            margin-bottom: 20px;
+        }
+        .memo-list {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .memo-list th, .memo-list td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .memo-list th {
+            background-color: #f8f9fa;
+            color: #333;
+            font-weight: bold;
+        }
+        .memo-list tr:hover {
+            background-color: #f5f5f5;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        .pagination li {
+            margin: 0 5px;
+        }
+        .pagination a {
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            color: #007bff;
+            border-radius: 3px;
+        }
+        .pagination .active a {
+            background-color: #007bff;
+            color: white;
+        }
+        .memo-form {
+            margin-top: 30px;
+        }
+        .memo-form input[type="text"],
+        .memo-form textarea,
+        .memo-form select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .memo-form textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-submit {
+            background-color: #28a745;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-submit:hover {
+            background-color: #218838;
+        }
+        @media (max-width: 768px) {
+            .memo-section {
+                width: 100%;
+            }
+        }
+        .memo-detail {
+            display: none;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        .memo-detail h3 {
+            margin-top: 0;
+        }
+        .memo-content {
+            margin-bottom: 15px;
+        }
+        .reply-form textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+        .clickable {
+            cursor: pointer;
+            color: #007bff;
+        }
+        .clickable:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="memo-container">
+        <div class="memo-lists">
+            <div class="memo-section">
+                <h2>받은 메모</h2>
+                <table class="memo-list">
+                    <tr>
+                        <th>보낸사람</th>
+                        <th>제목</th>
+                        <th>전송일</th>
+                    </tr>
+                    <tr th:each="mvo : ${mlist2}">
+                        <td th:text="${mvo.seSabun}"></td>
+                        <td class="clickable" th:onclick="showMemo([[${mvo.id}]], 'received')" th:text="${mvo.title}"></td>
+                        <td th:text="${mvo.writeday}"></td>
+                    </tr>
+                </table>
+                
+                <!-- 받은 메모 페이지네이션 -->
+                <nav th:if="${reChong > 1}">
+                    <ul class="pagination">
+                        <li th:class="${reCurrentGroup == 1} ? 'disabled' : ''">
+                            <a th:href="@{/myMemo(page=${(reCurrentGroup - 2) * 10}, sentPage=${sentPage})}" th:unless="${reCurrentGroup == 1}">이전</a>
+                        </li>
+                        <li th:each="pageNum : ${#numbers.sequence(reStartPage, reEndPage)}"
+                            th:class="${pageNum == page} ? 'active' : ''">
+                            <a th:href="@{/myMemo(page=${pageNum}, sentPage=${sentPage})}" th:text="${pageNum + 1}"></a>
+                        </li>
+                        <li th:class="${reCurrentGroup == reTotalGroup} ? 'disabled' : ''">
+                            <a th:href="@{/myMemo(page=${reCurrentGroup * 10}, sentPage=${sentPage})}" th:unless="${reCurrentGroup == reTotalGroup}">다음</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="memo-section">
+                <h2>보낸 메모</h2>
+                <table class="memo-list">
+                    <tr>
+                        <th>받는사람</th>
+                        <th>제목</th>
+                        <th>읽음</th>
+                        <th>전송일</th>
+                    </tr>
+                    <tr th:each="mvo : ${mlist1}">
+                        <td th:text="${mvo.reSabun}"></td>
+                        <td class="clickable" th:onclick="showMemo([[${mvo.id}]], 'sent')" th:text="${mvo.title}"></td>
+                        <td th:text="${mvo.state==0?'X':mvo.state==1?'O':'회신'}"></td>
+                        <td th:text="${mvo.writeday}"></td>
+                    </tr>
+                </table>
+                
+                <!-- 보낸 메모 페이지네이션 -->
+                <nav th:if="${seChong > 1}">
+                    <ul class="pagination">
+                        <li th:class="${seCurrentGroup == 1} ? 'disabled' : ''">
+                            <a th:href="@{/myMemo(page=${page}, sentPage=${(seCurrentGroup - 2) * 10})}" th:unless="${seCurrentGroup == 1}">이전</a>
+                        </li>
+                        <li th:each="pageNum : ${#numbers.sequence(seStartPage, seEndPage)}"
+                            th:class="${pageNum == sentPage} ? 'active' : ''">
+                            <a th:href="@{/myMemo(page=${page}, sentPage=${pageNum})}" th:text="${pageNum + 1}"></a>
+                        </li>
+                        <li th:class="${seCurrentGroup == seTotalGroup} ? 'disabled' : ''">
+                            <a th:href="@{/myMemo(page=${page}, sentPage=${seCurrentGroup * 10})}" th:unless="${seCurrentGroup == seTotalGroup}">다음</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 메모 상세 보기 및 답장 섹션 -->
+        <div id="memoDetail" class="memo-detail">
+            <h3 id="memoTitle"></h3>
+            <p><strong>보낸 사람: </strong><span id="memoSender"></span></p>
+            <p><strong>받는 사람: </strong><span id="memoReceiver"></span></p>
+            <p><strong>날짜: </strong><span id="memoDate"></span></p>
+            <div class="memo-content" id="memoContent"></div>
+            <div class="reply-form" id="replyForm">
+                <h4>답장</h4>
+                <textarea id="replyContent" placeholder="답장을 입력하세요"></textarea>
+                <button onclick="sendReply()">답장 보내기</button>
+            </div>
+        </div>
+
+        <div class="memo-form">
+            <h3>메모 작성</h3>
+            <form method="post" action="myMemo" enctype="multipart/form-data">
+                <input type="hidden" name="seSabun" th:value="${session.sabun}">
+                <select name="depart" onchange="getSawon(this.value)">
+                    <option value="">부서 선택</option>
+                    <option value="s01">총무부</option>
+                    <option value="s02">자재부</option>
+                    <option value="s03">영업부</option>
+                    <option value="s04">감사부</option>
+                </select>
+                <select name="reSabun" id="reSabun"></select>
+                <input type="text" name="title" placeholder="메모 제목">
+                <textarea name="content" placeholder="내용을 입력하세요"></textarea>
+                <input type="file" name="fname2">
+                <input type="submit" value="메모보내기" class="btn btn-submit">
+            </form>
+        </div>
+    </div>
+    
+     <script>
+    function getSawon(depart) {
+        if(depart == "") {
+            document.getElementById("reSabun").options.length = 0;
+        } else {
+            var chk = new XMLHttpRequest();
+            chk.onload = function() {
+                var slist = JSON.parse(chk.responseText);
+                var reSabun = document.getElementById("reSabun");
+                reSabun.options.length = slist.length;
+                slist.forEach((svo, index) => {
+                    reSabun.options[index] = new Option(svo.name, svo.sabun);
+                });
+            }
+            chk.open("get", "getSawon?depart=" + depart);
+            chk.send();
+        }
+    }
+
+    function showMemo(memoId, type) {
+        // 실제 구현에서는 서버에 AJAX 요청을 보내 메모 상세 정보를 가져와야 합니다.
+        // 여기서는 예시로 더미 데이터를 사용합니다.
+        fetch(`getMemo/${memoId}`)
+        	.then(response => response.json())
+        	.then(memoDetail => {
+		        document.getElementById("memoTitle").textContent = memoDetail.title;
+		        document.getElementById("memoSender").textContent = memoDetail.seSabun;
+		        document.getElementById("memoReceiver").textContent = memoDetail.reSabun;
+		        document.getElementById("memoDate").textContent = memoDetail.writeday;
+		        document.getElementById("memoContent").textContent = memoDetail.content;
+		
+		        // 받은 메모일 경우에만 답장 폼을 표시
+		        document.getElementById("replyForm").style.display = (type === 'received') ? "block" : "none";
+		
+		        document.getElementById("memoDetail").style.display = "block";        		
+        	})
+        	.catch(error => {
+        		console.error('Error:',error);
+        		alert("메모 정보를 불러오는데 실패했습니다.");
+        	})
+
+    }
+
+    function sendReply() {
+        var replyContent = document.getElementById("replyContent").value;
+        // 실제 구현에서는 서버에 답장을 보내는 AJAX 요청을 여기에 작성합니다.
+        alert("답장이 전송되었습니다: " + replyContent);
+        document.getElementById("replyContent").value = ""; // 답장 입력 필드 초기화
+    }
+</script>
+</section>
+
+</body>
+</html>

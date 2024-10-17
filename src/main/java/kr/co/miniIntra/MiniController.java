@@ -1,5 +1,10 @@
 package kr.co.miniIntra;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
 import org.apache.ibatis.annotations.Param;
@@ -7,8 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -135,5 +145,89 @@ public class MiniController {
 	@PostMapping("/update")
 	public String update() {
 		return null;
+	}
+	
+	@GetMapping("/myMemo")
+	public String myMemo(HttpSession session, Model model,
+	                     @RequestParam(defaultValue = "0") int page,
+	                     @RequestParam(defaultValue = "0") int sentPage) {
+
+	    if(session.getAttribute("sabun") == null) {
+	        return "redirect:/login";
+	    } else {
+	        String sabun = session.getAttribute("sabun").toString();
+	        int pageSize = 10;
+
+	        // 받은 메모 페이징
+	        int reIndex = page * pageSize;
+	        ArrayList<MemoVo> mlist2 = mapper.getRe(sabun, reIndex, pageSize);
+	        int reChong = mapper.getReChong(sabun, pageSize);
+
+	        // 받은 메모 페이지 그룹 계산
+	        int reCurrentGroup = (page / 10) + 1;
+	        int reTotalGroup = (reChong + 9) / 10;
+	        int reStartPage = (reCurrentGroup - 1) * 10;
+	        int reEndPage = Math.min(reCurrentGroup * 10 - 1, reChong - 1);
+
+	        model.addAttribute("mlist2", mlist2);
+	        model.addAttribute("page", page);
+	        model.addAttribute("reChong", reChong);
+	        model.addAttribute("reCurrentGroup", reCurrentGroup);
+	        model.addAttribute("reTotalGroup", reTotalGroup);
+	        model.addAttribute("reStartPage", reStartPage);
+	        model.addAttribute("reEndPage", reEndPage);
+
+	        // 보낸 메모 페이징
+	        int seIndex = sentPage * pageSize;
+	        ArrayList<MemoVo> mlist1 = mapper.getSend(sabun, seIndex, pageSize);
+	        int seChong = mapper.getSeChong(sabun, pageSize);
+
+	        // 보낸 메모 페이지 그룹 계산
+	        int seCurrentGroup = (sentPage / 10) + 1;
+	        int seTotalGroup = (seChong + 9) / 10;
+	        int seStartPage = (seCurrentGroup - 1) * 10;
+	        int seEndPage = Math.min(seCurrentGroup * 10 - 1, seChong - 1);
+
+	        model.addAttribute("mlist1", mlist1);
+	        model.addAttribute("sentPage", sentPage);
+	        model.addAttribute("seChong", seChong);
+	        model.addAttribute("seCurrentGroup", seCurrentGroup);
+	        model.addAttribute("seTotalGroup", seTotalGroup);
+	        model.addAttribute("seStartPage", seStartPage);
+	        model.addAttribute("seEndPage", seEndPage);
+
+	        return "/myMemo";
+	    }
+	}
+	
+	@PostMapping("/myMemo")
+	public String postMyMemo(MemoVo mvo,MultipartHttpServletRequest request) throws Exception {
+		MultipartFile file=request.getFile("fname2");
+		String dir=request.getServletContext().getRealPath("/uploads");
+		Path path=Paths.get(dir);
+		if(Files.notExists(path)) {
+			Files.createDirectory(path);
+		}
+		
+		if(!file.isEmpty()) {
+			String fname=file.getOriginalFilename();
+			path=Paths.get(dir,fname);
+			Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+			mvo.setFname(fname);
+		}
+		
+		mapper.memoOk(mvo);
+		
+		return "/myMemo";
+	}
+	
+	@GetMapping("/getSawon")
+	public @ResponseBody ArrayList<SawonVo> getSawon(@Param("depart") String depart) {
+		return mapper.getSawon(depart);
+	}
+	
+	@GetMapping("/getMemo/{id}")
+	public @ResponseBody MemoVo getMemo(@PathVariable int id) {
+		return mapper.getMemo(id);
 	}
 }
