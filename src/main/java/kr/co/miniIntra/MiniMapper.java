@@ -1,6 +1,7 @@
 package kr.co.miniIntra;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -20,4 +21,8 @@ public interface MiniMapper {
 	public int getReChong(String sabun, int pageSize);
 	public int getSeChong(String sabun, int pageSize);
 	public MemoVo getMemo(int id);
+	public boolean deleteMemo(List memoIds);
+	public boolean toWork(String sabun);
+	public boolean toHome(String sabun);
+	public String isWork(String sabun);
 }

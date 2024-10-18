@@ -6,14 +6,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -229,5 +236,61 @@ public class MiniController {
 	@GetMapping("/getMemo/{id}")
 	public @ResponseBody MemoVo getMemo(@PathVariable int id) {
 		return mapper.getMemo(id);
+	}
+	
+	@PostMapping("/deleteMemos")
+	public @ResponseBody ResponseEntity<Map<String, Boolean>> deleteMemo(@RequestBody MemoVo request) {
+		boolean success = mapper.deleteMemo(request.getMemoIds());
+		Map<String, Boolean> response=new HashMap<>();
+		response.put("success", success);
+		return ResponseEntity.ok(response);
+	}
+	
+	@GetMapping("/commute")
+	public String commute() {
+		return "/commute";
+	}
+	
+	@GetMapping("/commute1")
+	public @ResponseBody ResponseEntity<Map<String, String>> commute(HttpSession session) {
+		String sabun=session.getAttribute("sabun").toString();
+		String success=mapper.isWork(sabun);
+		
+		Map<String, String> response=new HashMap<>();
+		if(!success.isEmpty()) {
+			response.put("count", success);
+		} else {
+			response.put("count", "0");
+		}
+		return ResponseEntity.ok(response);
+		
+	}
+	
+	@PostMapping("/commute")
+	public @ResponseBody ResponseEntity<Map<String,String>> toWork(@RequestBody CommuteVo request) {
+		boolean success=mapper.toWork(request.getSabun());
+		Map<String,String> response=new HashMap<>();
+		
+		if(success) {
+			response.put("message", "출근이 기록되었습니다.");
+			return ResponseEntity.ok(response);
+		} else {
+			response.put("message", "출근 기록에 실패했습니다.");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+		}
+	}
+	
+	@PostMapping("/toHome") 
+	public @ResponseBody ResponseEntity<Map<String,String>> toHome(@RequestBody CommuteVo request) {
+		boolean success=mapper.toHome(request.getSabun());
+		Map<String,String> response=new HashMap<>();
+		
+		if(success) {
+			response.put("message", "퇴근이 기록되었습니다.");
+			return ResponseEntity.ok(response);
+		} else {
+			response.put("message", "퇴근 기록이 실패했습니다.");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+		}
 	}
 }

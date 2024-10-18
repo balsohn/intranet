@@ -132,6 +132,19 @@
         .clickable:hover {
             text-decoration: underline;
         }
+        
+        .delete-btn {
+            margin-top: 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -174,18 +187,21 @@
                 <h2>보낸 메모</h2>
                 <table class="memo-list">
                     <tr>
+                    	<th><input type="checkbox" id="selectAllSent" onclick="selectAll(this, 'sent')"></th>
                         <th>받는사람</th>
                         <th>제목</th>
                         <th>읽음</th>
                         <th>전송일</th>
                     </tr>
                     <tr th:each="mvo : ${mlist1}">
+                    	<td><input type="checkbox" name="memoCheckSent" th:value="${mvo.id}"></td>
                         <td th:text="${mvo.reSabun}"></td>
                         <td class="clickable" th:onclick="showMemo([[${mvo.id}]], 'sent')" th:text="${mvo.title}"></td>
                         <td th:text="${mvo.state==0?'X':mvo.state==1?'O':'회신'}"></td>
                         <td th:text="${mvo.writeday}"></td>
                     </tr>
                 </table>
+                <button class="delete-btn" onclick="deleteMemos('sent')">선택한 메모 삭제</button>
                 
                 <!-- 보낸 메모 페이지네이션 -->
                 <nav th:if="${seChong > 1}">
@@ -240,6 +256,55 @@
     </div>
     
      <script>
+     
+     function selectAll(source, type) {
+         var checkboxes = document.getElementsByName('memoCheck' + type.charAt(0).toUpperCase() + type.slice(1));
+         for(var i=0, n=checkboxes.length; i<n; i++) {
+             checkboxes[i].checked = source.checked;
+         }
+     }
+
+     function deleteMemos(type) {
+         var checkboxes = document.getElementsByName('memoCheck' + type.charAt(0).toUpperCase() + type.slice(1));
+         var selectedMemos = [];
+         for(var i=0; i<checkboxes.length; i++) {
+             if(checkboxes[i].checked) {
+                 selectedMemos.push(checkboxes[i].value);
+             }
+         }
+         
+         if(selectedMemos.length === 0) {
+             alert('삭제할 메모를 선택해주세요.');
+             return;
+         }
+		
+         if(confirm('선택한 메모를 삭제하시겠습니까?')) {
+             fetch('/deleteMemos', {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                 },
+                 body: JSON.stringify({
+                     memoIds: selectedMemos,
+                     type: type
+                 })
+             })
+             .then(response => response.json())
+             .then(data => {
+                 if(data.success) {
+                     alert('선택한 메모가 삭제되었습니다.');
+                     location.reload(); // 페이지 새로고침
+                 } else {
+                     alert('메모 삭제 중 오류가 발생했습니다.');
+                 }
+             })
+             .catch(error => {
+                 console.error('Error:', error);
+                 alert('메모 삭제 중 오류가 발생했습니다.');
+             });
+         }
+     }
+     
     function getSawon(depart) {
         if(depart == "") {
             document.getElementById("reSabun").options.length = 0;

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/default">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+  <style>
+    section {
+      width:1000px;
+      height:600px;
+      margin:auto;
+    }
+    section div {
+      margin-top:30px;
+      text-align:center;
+    }
+  </style>
+<script>
+	window.onload=function() {
+		commute();
+	}
+
+	function commute() {
+	    fetch(`/commute1`, {
+	        method: 'GET',
+	        headers: {
+	            'Content-Type': 'application/json',
+	        }
+	    })
+	    .then(response => response.json())
+	    .then(data => {
+	        console.log("서버 응답:", data);  // 서버 응답 로깅
+	        if(data.count && data.count !== '0') {
+	            document.getElementById("toWork").disabled = true;
+	            document.getElementById('message').textContent = '이미 출근하셨습니다.';
+	            document.getElementById('message').style.color = 'blue';
+	        } else {
+	            document.getElementById("toWork").disabled = false;
+	            document.getElementById('message').textContent = '출근 전입니다.';
+	            document.getElementById('message').style.color = 'green';
+	        }
+	    })
+	    .catch(error => {
+	        console.error('Error', error);
+	        document.getElementById('message').textContent = '서버 오류가 발생했습니다.';
+	        document.getElementById('message').style.color = 'red';
+	    });
+	}
+
+	function toWork() {
+		
+		fetch(`/commute`, {
+			method: 'POST',
+			headers : {
+				'Content-Type':'application/json'	
+			},
+			body: JSON.stringify({
+				sabun:'[[${session.sabun}]]'
+			})
+		})
+		.then(response => {
+			if(!response.ok) {
+				throw new Error("서버 응답이 실패했습니다.");
+			}
+			return response.json();
+		})
+		.then(data => {
+			document.getElementById('message').textContent = data.message;
+			document.getElementById("message").style.color="green";
+		})
+		.catch(error => {
+			console.error('Error',error);
+			document.getElementById('message').textContent = '서버 오류가 발생했습니다.';
+            document.getElementById('message').style.color = 'red';
+		})
+		commute();
+	}
+	
+	function toHome() {
+		fetch(`/toHome`, {
+			method:'POST',
+			headers: {
+				'Content-Type':'application/json'
+			},
+			body:JSON.stringify({
+				sabun:'[[${session.sabun}]]'
+			})
+		})
+		.then(response => {
+			if(!response.ok) {
+				throw new Error("연결이 실패했습니다.");
+			}
+			return response.json();
+		})
+		.then(data => {
+			document.getElementById('message').textContent = data.message;
+			document.getElementById("message").style.color="green";
+		})
+		.catch(error => {
+			console.error('Error',error);
+			document.getElementById('message').textContent = '서버 오류가 발생했습니다.';
+            document.getElementById('message').style.color = 'red';
+		})
+		commute();
+	}
+ </script>
+</head>
+<body>
+	<section layout:fragment="content">
+        <div id="top">
+            <input type="button" class="btn" id="toWork" value="출근하기" onclick="toWork()">
+            <input type="button" class="btn" value="퇴근하기" onclick="toHome()">
+        </div>
+        <div id="message"></div>
+    </section>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+

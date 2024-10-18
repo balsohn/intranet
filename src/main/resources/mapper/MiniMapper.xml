@@ -37,23 +37,51 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		(#{seSabun}, #{reSabun}, #{title}, #{content}, #{fname}, now())
 	</insert>
 	<select id="getRe" resultType="kr.co.miniIntra.MemoVo">
-		select * from memo where reSabun=#{sabun} order by writeday desc
+		select * from memo where reSabun=#{sabun} and delstate=0
+		order by writeday desc
 		limit #{index},#{pageSize}
 	</select>
 	<select id="getReChong" resultType="int">
 		select ceil(count(*)/#{pageSize}) from memo
-		where reSabun=#{sabun}
+		where reSabun=#{sabun} and delstate=0
 	</select>
 	
 	<select id="getSend" resultType="kr.co.miniIntra.MemoVo">
-		select * from memo where seSabun=#{sabun} order by writeday desc
+		select * from memo where seSabun=#{sabun} and delstate=0
+		order by writeday desc
 		limit #{seIndex},#{pageSize}
 	</select>
 		<select id="getSeChong" resultType="int">
 		select ceil(count(*)/#{pageSize}) from memo
-		where seSabun=#{sabun}
+		where seSabun=#{sabun} and delstate=0
 	</select>
 	<select id="getMemo" resultType="kr.co.miniIntra.MemoVo">
 		select * from memo where id=#{id}
+	</select>
+	<update id="deleteMemo">
+		update memo set delstate=1
+		where id in
+		<foreach item="id" collection="list" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+	<insert id="toWork">
+	<![CDATA[
+		insert into commute(sabun,toWork,writeday,state)
+		values (#{sabun},now(),curdate(), if(curtime()<='09:00:00',1,2))
+	]]>
+	</insert>
+	<update id="toHome">
+	<![CDATA[
+		update commute set
+		toHome=now(),
+		state=if(TIMESTAMPDIFF(hour,toWork,now())>=8,3,
+		      if(TIMESTAMPDIFF(hour,toWork,now())>=4,4,5))
+		where sabun=#{sabun} and writeday=curdate()
+	]]>
+	</update>
+	<select id="isWork" resultType="string">
+		select count(*) from commute
+		where sabun=#{sabun} and writeday=curdate()
 	</select>
 </mapper>
