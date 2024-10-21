@@ -6,4 +6,6 @@ import lombok.Data;
 public class SawonVo {
 	private int id,level;
 	private String sabun,name,pwd,email,phone,ipsa,writeday;
+	
+	private String depart;
 }

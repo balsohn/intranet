@@ -25,4 +25,11 @@ public interface MiniMapper {
 	public boolean toWork(String sabun);
 	public boolean toHome(String sabun);
 	public String isWork(String sabun);
+	public ArrayList<SawonVo> sawonList(String depart);
+	public int getSabun(String depart);
+	public int addSawon(SawonVo sawon);
+	public boolean delSawon(String sabun, String id);
+	public SawonVo showSawon(String id);
+	public int updateSawon(SawonVo sawon);
+	
 }

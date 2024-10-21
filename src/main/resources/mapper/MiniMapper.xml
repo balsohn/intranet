@@ -84,4 +84,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select count(*) from commute
 		where sabun=#{sabun} and writeday=curdate()
 	</select>
+	<select id="sawonList" resultType="kr.co.miniIntra.SawonVo">
+		select * from sawon
+		where sabun like concat(#{depart},'%') and sabun!='admin'
+	</select>
+	<select id="getSabun" resultType="int">
+		select ifnull(max(right(sabun,3)),0)+1
+		from sawon
+		where sabun like concat (#{depart},'%')
+	</select>
+	<insert id="addSawon">
+		insert into sawon(sabun, name,pwd, phone, email, ipsa, level, writeday)
+		values (#{sabun}, #{name}, #{pwd}, #{phone}, #{email}, #{ipsa}, #{level}, now())
+	</insert>
+	<delete id="delSawon">
+		delete from sawon
+		where sabun=#{sabun} and id=#{id}
+	</delete>
+	<select id="showSawon" resultType="kr.co.miniIntra.SawonVo">
+		select * from sawon where id=#{id}
+	</select>
+	<update id="updateSawon">
+		update sawon set sabun=#{sabun}, name=#{name}, phone=#{phone},
+		email=#{email}, level=#{level}
+		where id=#{id}
+	</update>
 </mapper>

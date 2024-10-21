@@ -293,4 +293,86 @@ public class MiniController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		}
 	}
+	
+	@GetMapping("/sawonList")
+	public String sawonList(@RequestParam(defaultValue = "") String depart,
+			Model model) {
+		ArrayList<SawonVo> slist=mapper.sawonList(depart); 
+		model.addAttribute("slist",slist);
+		
+		String part="전체";
+		switch(depart) {
+			case "s01":part="총무부"; break;
+			case "s02":part="자재부"; break;
+			case "s03":part="영업부"; break;
+			case "s04":part="감사부"; break;
+		}
+		
+		model.addAttribute("part",part);
+		
+		return "/sawonList";
+		
+	}
+	
+	@PostMapping("/sawonList")
+	public @ResponseBody ResponseEntity<Map<String,Object>> addSawon(@RequestBody SawonVo sawon) {
+		String depart=sawon.getDepart();
+		String sabun=depart+String.format("%03d", mapper.getSabun(depart));
+		sawon.setSabun(sabun);
+		mapper.addSawon(sawon);
+		
+		Map<String, Object> response=new HashMap<>();
+		response.put("success", true);
+		response.put("message", "사원이 성공적으로 추가됐습니다.");
+		response.put("sabun", sabun);
+		return ResponseEntity.ok(response);
+		
+	}
+	
+	@DeleteMapping("/sawonList/{sabun}/{id}")
+	public @ResponseBody ResponseEntity<Map<String,Object>> delSawon(@PathVariable String sabun,
+			@PathVariable String id) {
+		Map<String,Object> response=new HashMap<>();
+		
+		System.out.println("아이디"+id+"사번"+sabun);
+		boolean isDeleted=mapper.delSawon(sabun,id);
+		if(isDeleted) {
+			response.put("success", true);
+			response.put("message", "사원이 성공적으로 삭제 되었습니다.");
+			return ResponseEntity.ok(response);
+		} else {
+			response.put("success", false);
+			response.put("message", "사원을 찾을수 없습니다.");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+		}
+	}
+	
+	@GetMapping("/sawonInfo/{sabun}/{id}")
+	public @ResponseBody SawonVo showSawon(@PathVariable String sabun,
+			@PathVariable String id) {
+		SawonVo sawon=mapper.showSawon(id);
+        sawon.setDepart(sawon.getSabun().substring(0,3));	
+
+		return sawon;		
+	}
+	
+	@PostMapping("/updateSawon")
+	public @ResponseBody ResponseEntity<Map<String, Object>> updateSawon(@RequestBody SawonVo sawon) {
+		Map<String, Object> response=new HashMap<>();
+		if(!sawon.getSabun().substring(0,3).equals(sawon.getDepart())) {
+			String sabun=sawon.getDepart()+String.format("%03d", mapper.getSabun(sawon.getDepart())); 
+			sawon.setSabun(sabun);			
+		}
+		int result=mapper.updateSawon(sawon);
+		
+		if(result>0) {
+			response.put("success", true);
+			response.put("message", "사원 정보가 수정되었습니다.");
+		} else {
+			response.put("success", false);
+			response.put("message", "업데이트 할 사원 정보를 찾을수 없습니다.");
+		}
+		
+		return ResponseEntity.ok(response);
+	}
 }

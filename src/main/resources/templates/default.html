@@ -107,7 +107,15 @@
     </header>
     <nav id="nav-container">
         <ul>
-            <li><a href="#">사원관리</a></li>
+            <li th:if="${session.level>=50}"><a href="#">사원관리</a>
+            	<ul class="grp">
+            		<li th:if="${session.level==100 || (session.depart=='총무부' && session.level>=50)}"> <a href='/sawonList?depart=s01'>총무부</a> </li>
+            		<li th:if="${session.level==100 || (session.depart=='자재부' && session.level>=50)}"> <a href='/sawonList?depart=s02'>자재부</a> </li>
+            		<li th:if="${session.level==100 || (session.depart=='영업부' && session.level>=50)}"> <a href='/sawonList?depart=s03'>영업부</a> </li>
+            		<li th:if="${session.level==100 || (session.depart=='감사부' && session.level>=50)}"> <a href='/sawonList?depart=s04'>감사부</a> </li>
+            		<li th:if="${session.level==100}"> <a href='/sawonList'>전체</a> </li>
+            	</ul>
+            </li>
             <li>
                 <a href="#">부서게시판</a>
                 <ul class="grp">
